@@ -16,6 +16,7 @@
  * dans la génération de documentation.
  */
 #include "queue.h"
+#include "stack.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +24,7 @@
 #define BUFFER_GETLINE 100
 #define LEN_OP 1
 #include "token.h"
+#define OP_STACK_SIZE 0
 /* Full definition of the queue structure */
 typedef struct s_internalQueue {
 	const void* value;
@@ -150,8 +152,70 @@ Queue* stringToTokenQueue(const char* expression){
 	return queue;
 }
         
+
+
+
+Queue* shuntingYard(Queue* infix){
+    Queue *qout = create_queue();
+    Stack* opStack = create_stack(OP_STACK_SIZE);
     
+    while(!queue_empty(infix)){
+        ptrToken current = (Token*)queue_top(infix);
+        queue_pop(infix);  // Supprime l'élément après lecture
+        
+        // Si le token est un nombre, on l'ajoute à la file de sortie
+        if(token_is_number(current)) {
+            queue_push(qout, (const void*)current);
+        }
+        
+        // Si le token est un opérateur
+        else if(token_is_operator(current)){
+            // Traiter les opérateurs en empilant selon la priorité
+            while(!stack_empty(opStack) && 
+                  !isLeftParenthesis(stack_top(opStack)) &&
+                  (isHighterPriority((Token*)stack_top(opStack), current) ||
+                   (isEqualPriority((Token*)stack_top(opStack), current) &&
+                    token_operator_leftAssociative((Token*)current)))) {
+                queue_push(qout, stack_top(opStack));
+                stack_pop(opStack);
+            }
+            stack_push(opStack, (void*)current); // Empile l'opérateur courant
+        }
+        
+        // Si le token est une parenthèse gauche
+        else if(isLeftParenthesis(current)) {
+            stack_push(opStack, (void*)current);
+        }
+        
+        // Si le token est une parenthèse droite
+        else if(isRightParenthesis(current)) {
+            // Dépiler jusqu'à trouver une parenthèse gauche
+            while(!stack_empty(opStack) && !isLeftParenthesis(stack_top(opStack))) {
+                queue_push(qout, stack_top(opStack));
+                stack_pop(opStack);
+            }
+            // Si aucune parenthèse gauche n'est trouvée, il y a une erreur
+            if(stack_empty(opStack)) {
+                fprintf(stderr, "Erreur : Parenthèses mal appariées.\n");
+                exit(EXIT_FAILURE);
+            }
+            stack_pop(opStack); // Retirer la parenthèse gauche sans la mettre dans qout
+        }
+    }
+
+    // Ajouter tous les opérateurs restants dans la pile à la file de sortie
+    while(!stack_empty(opStack)) {
+        if(isLeftParenthesis(stack_top(opStack))) {
+            fprintf(stderr, "Erreur : Parenthèses mal appariées.\n");
+            exit(EXIT_FAILURE);
+        }
+        queue_push(qout, stack_top(opStack));
+        stack_pop(opStack);
+    }
     
+    return qout;
+}
+
     
     
 bool isSymbol(char c){

@@ -110,3 +110,24 @@ void token_dump(FILE* f, const Token* t) {
 		fprintf(f, "%c ", t->value.symbol);
 }
 
+bool isHighterPriority(const Token* token1, const Token* token2){
+	return token_operator_priority(token1) > token_operator_priority(token2);
+}
+
+bool isEqualPriority(const Token* token1,const Token* token2){
+	return token_operator_priority(token1) == token_operator_priority(token2);
+}
+
+bool isLeftParenthesis(const Token* t){
+	if(token_is_parenthesis(t)){
+		return token_parenthesis(t) == '(';	
+	}
+	return false;
+}
+
+bool isRightParenthesis(const Token* t){
+	if(token_is_parenthesis(t)){
+		return token_parenthesis(t) == ')';	
+	}
+	return false;
+}

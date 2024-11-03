@@ -83,6 +83,14 @@ int token_operator_priority(const Token* t);
  */
 bool token_operator_leftAssociative(const Token* t);
 
+bool isHighterPriority(const Token* token1, const Token* token2);
+
+bool isEqualPriority(const Token* token1, const Token* token2);
+
+bool isLeftParenthesis(const Token* t);
+
+bool isRightParenthesis(const Token* t);
+
 /** Dump the token to the given file */
 void token_dump(FILE* f, const Token* t);
 #endif

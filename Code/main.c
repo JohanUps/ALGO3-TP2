@@ -31,8 +31,13 @@ void computeExpressions(FILE* input) {
 		Queue* q = stringToTokenQueue((const char*)line);
 		fprintf(stdout,"Infix   : ");
 		print_queue(stdout,q);
+		printf("\n");
+		Queue* shYard = shuntingYard(q);
+		fprintf(stdout,"Shunting Yard   : ");
+		print_queue(stdout,shYard);
 		printf("\n\n");
 	}
+	
 }
 
 /** Main function for testing.

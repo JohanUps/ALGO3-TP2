@@ -71,5 +71,7 @@ bool isNumber(char c);
 
 char* subString(const char * inputString, int startPos, int len );
 
+Queue* shuntingYard(Queue* infix);
+
 #endif
 
